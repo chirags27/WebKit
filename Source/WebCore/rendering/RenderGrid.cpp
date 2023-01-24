@@ -110,9 +110,19 @@ void RenderGrid::styleDidChange(StyleDifference diff, const RenderStyle* oldStyl
         }
     }
 
+    auto subgridChanged = subgridDidChange(*oldStyle);
     if (explicitGridDidResize(*oldStyle) || namedGridLinesDefinitionDidChange(*oldStyle) || implicitGridLinesDefinitionDidChange(*oldStyle) || oldStyle->gridAutoFlow() != style().gridAutoFlow()
-        || (style().gridAutoRepeatColumns().size() || style().gridAutoRepeatRows().size()))
+        || (style().gridAutoRepeatColumns().size() || style().gridAutoRepeatRows().size()) || subgridChanged)
         dirtyGrid();
+
+    if (subgridChanged)
+        downcast<RenderGrid>(parent())->dirtyGrid();
+}
+
+bool RenderGrid::subgridDidChange(__unused const RenderStyle& oldStyle) const
+{
+    return oldStyle.gridSubgridRows() != style().gridSubgridRows()
+        || oldStyle.gridSubgridColumns() != style().gridSubgridColumns();
 }
 
 bool RenderGrid::explicitGridDidResize(const RenderStyle& oldStyle) const
